@@ -111,6 +111,24 @@ the H20Wave framework after this point.
 
 ## Detailed System Design
 ------------------------
+
+The main file "app.py" outlines the UI elements show on the page.
+
+At the moment, there is no authentication or hosting of real-time data. Every element
+on the website is currently mock data but has allowed me to learn more about the compositional
+aspects of the H20 framework.
+
+Each view presently within the app: "Table View" and "Plot View" is defined by their own functions.
+Before the DOM renders each respective data chart, the function del q.page[] is used to wipe the
+screen clean before the function then proceeds to bring up the respective chart.
+
+From my brief experimentation with the framework, every frontend element encountered so far is 
+laid out in a dictionary/array format which simplifies the composotion of the frontend. Further
+research into the backend integration in this framework will be needed as development continues.
+
+
+
+
 To be updated as development progresses.
 
 
