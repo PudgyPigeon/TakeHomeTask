@@ -13,10 +13,13 @@ async def serve(q):
         table_view(q)
     elif q.args.plot:
         plot_view(q)
+    elif q.args.dashboard:
+        dashboard_view(q)    
     elif (q.args.x_variable is not None) or (q.args.y_variable is not None):
         q.client.x_variable = q.args.x_variable
         q.client.y_variable = q.args.y_variable
         plot_view(q)
+    
 
     # Save page
     await q.page.save()
@@ -38,7 +41,7 @@ def new_user_setup(q):
     # Header
     q.page["header"] = ui.header_card(
         box="header",
-        title="Aggregated Visualizer",
+        title="Data Visualizer",
         subtitle="Allowing users to easily visualize large datasets",
     )
     # Navbar
@@ -47,6 +50,7 @@ def new_user_setup(q):
         items=[
             ui.tab(name="table", label="Table View"),
             ui.tab(name="plot", label="Plot View"),
+            ui.tab(name="dashboard", label="Dashboard View")
         ],
     )
 
@@ -55,10 +59,10 @@ def new_user_setup(q):
 
     q.client.initialized = True
 
-
 # Defines table view logic
 def table_view(q):
     del q.page["plot_view"]
+    del q.page["dashboard_view"]
 
     df = aggregated_data()
 
@@ -83,10 +87,10 @@ def table_view(q):
         ],
     )
 
-
 # Defines plot view logic
 def plot_view(q):
     del q.page["table_view"]
+    del q.page["dashboard_view"]
 
     df = aggregated_data()
 
@@ -142,7 +146,20 @@ def plot_view(q):
         ],
     )
 
-
+# Defines dashboard tab logic
+def dashboard_view(q):
+    del q.page["plot_view"]
+    del q.page["table_view"]
+    
+    df = aggregated_data()
+    
+    q.page["dashboard_view"] = ui.markdown_card(
+        box="content",
+        title="Hello",
+        content="hello world whazza frazza"
+    )
+    
+    
 # Defines preliminary dataset logic
 def aggregated_data():
     df = pd.DataFrame(dict(c1=range(0, 100), c2=range(1, 101), counts=range(2, 102)))
