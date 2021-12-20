@@ -1,6 +1,7 @@
 # Import library for h20wave
 from h2o_wave import ui, Q, app, main, data
 import pandas as pd
+import boto3
 
 # Main function which serves the site
 @app("/")
@@ -27,9 +28,10 @@ async def serve(q):
 
 # Sets up site for new client/user
 def new_user_setup(q):
-    # Responsive layout
+    # Responsive layout and lays out zones for each type of UI element
     q.page["meta"] = ui.meta_card(
         box="",
+        theme="neon",
         layouts=[
             ui.layout(
                 breakpoint="xs",
@@ -37,12 +39,11 @@ def new_user_setup(q):
             )
         ],
     )
-
     # Header
     q.page["header"] = ui.header_card(
         box="header",
-        title="Data Visualizer",
-        subtitle="Allowing users to easily visualize large datasets",
+        title="Take Home Task",
+        subtitle="Shows users data in visual charts",
     )
     # Navbar
     q.page["navigation"] = ui.tab_card(
@@ -59,10 +60,19 @@ def new_user_setup(q):
 
     q.client.initialized = True
 
+
+# Instantiate Boto3 Client to interact with AWS S3 bucket
+def server_setup(q):
+    
+    s3_client = boto3.client('s3')
+    response = s3_client.list_buckets()
+
+
 # Defines table view logic
 def table_view(q):
     del q.page["plot_view"]
-    del q.page["dashboard_view"]
+    del q.page["dashboard1"]
+    del q.page["dashboard2"]
 
     df = aggregated_data()
 
@@ -90,11 +100,12 @@ def table_view(q):
 # Defines plot view logic
 def plot_view(q):
     del q.page["table_view"]
-    del q.page["dashboard_view"]
+    del q.page["dashboard1"]
+    del q.page["dashboard2"]
 
     df = aggregated_data()
 
-    q.page["table_view"] = ui.form_card(
+    q.page["plot_view"] = ui.form_card(
         box="content",
         items=[
             ui.text_xl(
@@ -148,18 +159,27 @@ def plot_view(q):
 
 # Defines dashboard tab logic
 def dashboard_view(q):
+    #Deletes UI elements from other tabs
     del q.page["plot_view"]
     del q.page["table_view"]
     
     df = aggregated_data()
     
-    q.page["dashboard_view"] = ui.markdown_card(
+    q.page['dashboard1'] = ui.form_card(box='content', items=[
+            ui.slider(name='slider', label='Standard slider', min=0, max=100, step=10, value=30),
+            ui.slider(name='slider_zero', label='Origin from zero', min=-10, max=10, step=1, value=-3),
+            ui.slider(name='slider_disabled', label='Disabled slider', min=0, max=100, step=10, value=30,
+                      disabled=True),
+            ui.button(name='show_inputs', label='Submit', primary=True),
+        ])
+    
+    q.page["dashboard2"] = ui.form_card(
         box="content",
-        title="Hello",
-        content="hello world whazza frazza"
+        items=[
+            ui.text_xl("Hello there ")
+        ]
     )
-    
-    
+
 # Defines preliminary dataset logic
 def aggregated_data():
     df = pd.DataFrame(dict(c1=range(0, 100), c2=range(1, 101), counts=range(2, 102)))
