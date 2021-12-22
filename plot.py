@@ -6,10 +6,10 @@ def plot_view(q, dataframe):
     del q.page["dashboard1"]
     del q.page["dashboard2"]
 
-    #Loads in dataframe into df variable
+    # Loads in dataframe into df variable
     df = dataframe
 
-    #Defines logic for plot_view card
+    # Defines logic for plot_view card
     q.page["plot_view"] = ui.form_card(
         box="content",
         items=[
@@ -58,4 +58,3 @@ def plot_view(q, dataframe):
             ),
         ],
     )
-    

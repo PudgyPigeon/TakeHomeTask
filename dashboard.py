@@ -24,4 +24,3 @@ def dashboard_view(q, dataframe):
     q.page["dashboard2"] = ui.form_card(
         box="content", items=[ui.text_xl(df.iloc[:, 0:2].to_string())]
     )
-

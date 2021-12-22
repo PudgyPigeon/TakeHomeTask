@@ -7,10 +7,10 @@ import os
 
 # Load data into a custom variable to make it easier to access data throughout program
 def load_data():
-    
-    #Load environemnt variables for AWS S3 keys
+
+    # Load environemnt variables for AWS S3 keys
     load_dotenv()
-    
+
     # ENV variables for AWS config
     aws_key = os.environ.get("AWS_KEY")
     aws_secret = os.environ.get("AWS_SECRET_KEY")

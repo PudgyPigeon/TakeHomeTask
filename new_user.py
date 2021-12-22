@@ -4,10 +4,10 @@ import pandas as pd
 
 # Sets up site for new client/user
 def new_user_setup(q, dataframe):
-    
-    #Loads in dataframe to df variable to set initial x/y variables for the plot view
+
+    # Loads in dataframe to df variable to set initial x/y variables for the plot view
     df = dataframe
-        
+
     # Responsive layout and lays out zones for each type of UI element
     q.page["meta"] = ui.meta_card(
         box="",
