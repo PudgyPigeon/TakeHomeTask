@@ -1,9 +1,9 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:3.8.10
 
-WORKDIR /app
+WORKDIR /usr/src
 COPY ./python/requirements.txt requirements.txt
-COPY . .
+COPY . /usr/src
 
 RUN pip install --upgrade pip
 RUN pip --default-timeout=100 install -r requirements.txt

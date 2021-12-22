@@ -136,13 +136,3 @@ The app was composed in WSL2 initially and then Dockerized after completion of t
 Docker component of this app relies on the Dockerfile as well as the Docker Compose file, both 
 of which define the libraries, CLI commands, and various other variables necessary for setting
 up the development environment.
-
-# Checklist of things to do:
-
-1.) Link dataframe to user input changes, then display it
-
-2.) Set up SSO Authentication/Login for user
-
-3.) Dockerize Application
-
-
