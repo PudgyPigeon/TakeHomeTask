@@ -1,10 +1,35 @@
-# Import library for h20wave
+# Import libraries
 from h2o_wave import ui, Q, app, main, data
 import pandas as pd
 import boto3
 from dotenv import load_dotenv
 import os
 import io
+
+# Load data into a custom variable to make it easier to access data throughout program
+def load_data():
+    # ENV variables for AWS config
+    aws_key = os.environ.get("AWS_KEY")
+    aws_secret = os.environ.get("AWS_SECRET_KEY")
+
+    # Assign specific bucket holding data to variable: s3
+    s3 = boto3.resource(
+        "s3", aws_access_key_id=aws_key, aws_secret_access_key=aws_secret
+    )
+
+    # Set up buffer
+    buffer = io.BytesIO()
+
+    # Get parquet file and read it into data variable
+    object = s3.Object(bucket_name="myparq", key="minwage.parquet")
+    object.download_fileobj(buffer)
+    dataframe = pd.read_parquet(buffer)
+
+    # Return data that Pandas has read
+    return dataframe
+
+
+dataframe = load_data()
 
 # Main function which serves the site
 @app("/")
@@ -14,19 +39,16 @@ async def serve(q):
         load_dotenv()
         new_user_setup(q)
         table_view(q)
-        server_setup(q)
-        
     elif q.args.table:
         table_view(q)
     elif q.args.plot:
         plot_view(q)
     elif q.args.dashboard:
-        dashboard_view(q)    
+        dashboard_view(q)
     elif (q.args.x_variable is not None) or (q.args.y_variable is not None):
         q.client.x_variable = q.args.x_variable
         q.client.y_variable = q.args.y_variable
         plot_view(q)
-    
 
     # Save page
     await q.page.save()
@@ -57,7 +79,7 @@ def new_user_setup(q):
         items=[
             ui.tab(name="table", label="Table View"),
             ui.tab(name="plot", label="Plot View"),
-            ui.tab(name="dashboard", label="Dashboard View")
+            ui.tab(name="dashboard", label="Dashboard View"),
         ],
     )
 
@@ -67,31 +89,9 @@ def new_user_setup(q):
     q.client.initialized = True
 
 
-# Instantiate Boto3 Client to interact with AWS S3 bucket
-def server_setup(q):
-    
-    # ENV variables for AWS config
-    aws_key = os.environ.get("AWS_KEY")
-    aws_secret = os.environ.get("AWS_SECRET_KEY")
-    
-    # Assign specific bucket holding data to variable: s3
-    s3 = boto3.resource('s3',
-                        aws_access_key_id=aws_key,
-                        aws_secret_access_key=aws_secret)
-    
-    #Set up buffer
-    buffer = io.BytesIO()
-
-    # Get parquet file and read it into data variable    
-    object = s3.Object(bucket_name='myparq', key='minwage.parquet')
-    object.download_fileobj(buffer)
-    
-    dataframe = pd.read_parquet(buffer)
-    
-    print(dataframe)
-    
 # Defines table view logic
 def table_view(q):
+    # Deletes cards from the other tabs
     del q.page["plot_view"]
     del q.page["dashboard1"]
     del q.page["dashboard2"]
@@ -118,6 +118,7 @@ def table_view(q):
             ),
         ],
     )
+
 
 # Defines plot view logic
 def plot_view(q):
@@ -179,32 +180,33 @@ def plot_view(q):
         ],
     )
 
+
 # Defines dashboard tab logic
 def dashboard_view(q):
-    #Deletes UI elements from other tabs
+    # Deletes UI elements from other tabs
     del q.page["plot_view"]
     del q.page["table_view"]
-    
+
     df = aggregated_data()
-    
-    q.page['dashboard1'] = ui.form_card(box='content', items=[
-            ui.slider(name='slider', label='Standard slider', min=0, max=100, step=10, value=30),
-            ui.slider(name='slider_zero', label='Origin from zero', min=-10, max=10, step=1, value=-3),
-            ui.slider(name='slider_disabled', label='Disabled slider', min=0, max=100, step=10, value=30,
-                      disabled=True),
-            ui.button(name='show_inputs', label='Submit', primary=True),
-        ])
-    
-    q.page["dashboard2"] = ui.form_card(
+
+    q.page["dashboard1"] = ui.form_card(
         box="content",
         items=[
-            ui.text_xl("Hello there, General Kenobi ")
-        ]
+            ui.range_slider(
+                name="range_slider",
+                label="Select the cities you wish to view data for between two rankings",
+                min=1,
+            ),
+            ui.button(name="show_inputs", label="Submit", primary=True),
+        ],
     )
-    
+
+    q.page["dashboard2"] = ui.form_card(
+        box="content", items=[ui.text_xl(df.iloc[:, 0:2].to_string())]
+    )
+
 
 # Defines preliminary dataset logic
 def aggregated_data():
     df = pd.DataFrame(dict(c1=range(0, 100), c2=range(1, 101), counts=range(2, 102)))
-    print(df.head())
     return df

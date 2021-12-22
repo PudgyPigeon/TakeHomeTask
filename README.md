@@ -139,8 +139,7 @@ up the development environment.
 
 # Checklist of things to do:
 
-1.) Fetch data from AWS S3 Bucket - Perhaps through a library like Pandas or Boto3
-    -Then display it in charts using q.args
+1.) Link dataframe to user input changes, then display it
 
 2.) Set up SSO Authentication/Login for user
 
