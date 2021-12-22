@@ -4,6 +4,7 @@ import pandas as pd
 import boto3
 from dotenv import load_dotenv
 import os
+import io
 
 # Main function which serves the site
 @app("/")
@@ -69,21 +70,26 @@ def new_user_setup(q):
 # Instantiate Boto3 Client to interact with AWS S3 bucket
 def server_setup(q):
     
-    awskey = os.environ.get("AWS_KEY")
-    awssecret = os.environ.get("AWS_SECRET_KEY")
+    # ENV variables for AWS config
+    aws_key = os.environ.get("AWS_KEY")
+    aws_secret = os.environ.get("AWS_SECRET_KEY")
     
-    s3 = boto3.resource('s3')
-    # response = s3.get_object(Bucket='myparq', Key='minwage.parquet')
-    # data = response('Body').read()
+    # Assign specific bucket holding data to variable: s3
+    s3 = boto3.resource('s3',
+                        aws_access_key_id=aws_key,
+                        aws_secret_access_key=aws_secret)
     
-    for bucket in s3.buckets.all():
-        print(bucket.name)
-        
-    obj = s3.Object(bucket_name='myparq', key='minwage.parquet')
-    response = obj.get()
-    data = response['Body'].read()
-    print(data)
+    #Set up buffer
+    buffer = io.BytesIO()
 
+    # Get parquet file and read it into data variable    
+    object = s3.Object(bucket_name='myparq', key='minwage.parquet')
+    object.download_fileobj(buffer)
+    
+    dataframe = pd.read_parquet(buffer)
+    
+    print(dataframe)
+    
 # Defines table view logic
 def table_view(q):
     del q.page["plot_view"]
