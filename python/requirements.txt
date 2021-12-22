@@ -20,6 +20,8 @@ boto3 == 1.20.26
 # TakeHomeTask/venv/lib64/python3.8/site-packages/click/_compat.py: 541
 colorama == 0.4.3
 
+python-dotenv
+
 # TakeHomeTask/venv/lib/python3.8/site-packages/httpcore/_backends/curio.py: 4,5
 # TakeHomeTask/venv/lib/python3.8/site-packages/httpx/_utils.py: 406
 # TakeHomeTask/venv/lib/python3.8/site-packages/sniffio/_impl.py: 61
