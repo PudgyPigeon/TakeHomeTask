@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./python/Dockerfile
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      - server
+    tty: true
+    environment:
+      - H2O_APP_ADDRESS=http://server:8000
+      - H2O_WAVE_ADDRESS=http://server:10101
+
+  server:
+    build:
+      context: .
+      dockerfile: ./wave/Dockerfile
+      args:
+        - WAVE_VERSION=0.19.0
+    working_dir: /app/wave
+    command: ./wave/waved
+    ports:
+      - '10101:10101'
