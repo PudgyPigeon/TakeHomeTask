@@ -11,16 +11,14 @@ def load_data():
     # Load environemnt variables for AWS S3 keys
     load_dotenv()
 
-
     # ENV variables for AWS config
     aws_key = os.environ.get("AWS_ACCESS_KEY_ID")
     aws_secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
-
     # Assign specific bucket holding data to variable: s3
     s3 = boto3.resource(
         "s3", aws_access_key_id=aws_key, aws_secret_access_key=aws_secret
-        )
+    )
 
     # Set up buffer
     buffer = io.BytesIO()

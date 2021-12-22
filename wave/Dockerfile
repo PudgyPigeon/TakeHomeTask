@@ -2,8 +2,7 @@ FROM ubuntu:18.04
 
 ARG WAVE_VERSION
 
-WORKDIR /usr/wave
-COPY . /usr/wave
+COPY . .
 
 RUN apt update -y \
     && apt upgrade -y \

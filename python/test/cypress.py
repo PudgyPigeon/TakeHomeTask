@@ -14,7 +14,7 @@ from typing import Dict, List, Optional
 class Process:
     def __init__(self, cmd: List[str], env: Dict[str, str] = {}, sleep_time=5):
         self.cmd = cmd
-        self.cmdline = ' '.join([str(c) for c in self.cmd])
+        self.cmdline = " ".join([str(c) for c in self.cmd])
         process_env = os.environ.copy()
         process_env.update(env)
         self.env = process_env
@@ -65,7 +65,7 @@ def run_app_with_test(
     browser: Optional[str],
     start_wave: Optional[str],
     wave_web_dir: Optional[str],
-    **kwargs
+    **kwargs,
 ):
     def do_run():
         with TempDir(test_dir / "cypress/integration") as spec_dir:
@@ -93,7 +93,11 @@ def run_app_with_test(
                 )
 
     if start_wave:
-        cmd = [str(start_wave), "-web-dir", str(wave_web_dir)] if wave_web_dir else [start_wave]
+        cmd = (
+            [str(start_wave), "-web-dir", str(wave_web_dir)]
+            if wave_web_dir
+            else [start_wave]
+        )
         with Process(cmd=cmd, sleep_time=delay):
             do_run()
     else:
@@ -112,10 +116,12 @@ def dir_argument(dir_name: str):
     raise ArgumentTypeError(f"directory not found: {dir_name}")
 
 
-def test_path() -> Path: return Path(__file__).parent.resolve()
+def test_path() -> Path:
+    return Path(__file__).parent.resolve()
 
 
-def wave_root() -> Path: return (test_path() / '..').resolve()
+def wave_root() -> Path:
+    return (test_path() / "..").resolve()
 
 
 def default_web_dir() -> Path:
@@ -167,7 +173,7 @@ def main():
         const=default_wave_path(),
         default=None,
         metavar="wave_path",
-        help="start Wave before running the tests, optionally from the given path"
+        help="start Wave before running the tests, optionally from the given path",
     )
     parser.add_argument(
         "-wd",
