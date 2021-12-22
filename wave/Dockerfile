@@ -9,4 +9,4 @@ RUN apt update -y \
 
 RUN curl -L https://github.com/h2oai/wave/releases/download/v${WAVE_VERSION}/wave-${WAVE_VERSION}-linux-amd64.tar.gz -o wave-${WAVE_VERSION}-linux-amd64.tar.gz \
     && tar -xzf wave-${WAVE_VERSION}-linux-amd64.tar.gz \
-    && mv wave-${WAVE_VERSION}-linux-amd64 /usr/wave
+    && mv wave-${WAVE_VERSION}-linux-amd64 usr/wave
