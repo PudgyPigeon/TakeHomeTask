@@ -1,212 +1,43 @@
 # Import libraries
-from h2o_wave import ui, Q, app, main, data
+from h2o_wave import ui, Q, app, main, data, site
 import pandas as pd
 import boto3
 from dotenv import load_dotenv
 import os
 import io
 
-# Load data into a custom variable to make it easier to access data throughout program
-def load_data():
-    # ENV variables for AWS config
-    aws_key = os.environ.get("AWS_KEY")
-    aws_secret = os.environ.get("AWS_SECRET_KEY")
+#Import custom modules
+from backend import load_data
+from new_user import new_user_setup
+from table import table_view
+from plot import plot_view
+from dashboard import dashboard_view
 
-    # Assign specific bucket holding data to variable: s3
-    s3 = boto3.resource(
-        "s3", aws_access_key_id=aws_key, aws_secret_access_key=aws_secret
-    )
-
-    # Set up buffer
-    buffer = io.BytesIO()
-
-    # Get parquet file and read it into data variable
-    object = s3.Object(bucket_name="myparq", key="minwage.parquet")
-    object.download_fileobj(buffer)
-    dataframe = pd.read_parquet(buffer)
-
-    # Return data that Pandas has read
-    return dataframe
-
-
+#Use custom module to load in dataset from AWS S3
 dataframe = load_data()
 
 # Main function which serves the site
 @app("/")
 async def serve(q):
 
+    #Sets up a new user and presents the table view as the initial UI element
     if not q.client.initialized:
-        load_dotenv()
-        new_user_setup(q)
-        table_view(q)
+        new_user_setup(q, dataframe)
+        table_view(q, dataframe)
+        
+    #If the query argument changes when user clicks on a tab - call a function that defines
+    #the logic that renders the dataset/UI elemeents on the web page
     elif q.args.table:
-        table_view(q)
+        table_view(q, dataframe)
     elif q.args.plot:
-        plot_view(q)
+        plot_view(q,dataframe)
     elif q.args.dashboard:
-        dashboard_view(q)
+        dashboard_view(q, dataframe)
     elif (q.args.x_variable is not None) or (q.args.y_variable is not None):
         q.client.x_variable = q.args.x_variable
         q.client.y_variable = q.args.y_variable
-        plot_view(q)
+        plot_view(q,dataframe)
 
     # Save page
     await q.page.save()
 
-
-# Sets up site for new client/user
-def new_user_setup(q):
-    # Responsive layout and lays out zones for each type of UI element
-    q.page["meta"] = ui.meta_card(
-        box="",
-        theme="neon",
-        layouts=[
-            ui.layout(
-                breakpoint="xs",
-                zones=[ui.zone("header"), ui.zone("navigation"), ui.zone("content")],
-            )
-        ],
-    )
-    # Header
-    q.page["header"] = ui.header_card(
-        box="header",
-        title="Take Home Task",
-        subtitle="Shows users data in visual charts",
-    )
-    # Navbar
-    q.page["navigation"] = ui.tab_card(
-        box="navigation",
-        items=[
-            ui.tab(name="table", label="Table View"),
-            ui.tab(name="plot", label="Plot View"),
-            ui.tab(name="dashboard", label="Dashboard View"),
-        ],
-    )
-
-    q.client.x_variable = "c1"
-    q.client.y_variable = "c2"
-
-    q.client.initialized = True
-
-
-# Defines table view logic
-def table_view(q):
-    # Deletes cards from the other tabs
-    del q.page["plot_view"]
-    del q.page["dashboard1"]
-    del q.page["dashboard2"]
-
-    df = aggregated_data()
-
-    q.page["table_view"] = ui.form_card(
-        box="content",
-        items=[
-            ui.text_xl("Table View"),
-            ui.table(
-                name="aggregated_data_table",
-                columns=[
-                    ui.table_column(name=col, label=col) for col in df.columns.values
-                ],
-                rows=[
-                    ui.table_row(
-                        name=str(i),
-                        cells=[str(df[col].values[i]) for col in df.columns.values],
-                    )
-                    for i in range(len(df))
-                ],
-                downloadable=True,
-            ),
-        ],
-    )
-
-
-# Defines plot view logic
-def plot_view(q):
-    del q.page["table_view"]
-    del q.page["dashboard1"]
-    del q.page["dashboard2"]
-
-    df = aggregated_data()
-
-    q.page["plot_view"] = ui.form_card(
-        box="content",
-        items=[
-            ui.text_xl(
-                f"Relationship between {q.client.x_variable} and {q.client.y_variable}"
-            ),
-            ui.inline(
-                items=[
-                    ui.dropdown(
-                        name="x_variable",
-                        label="X Variable",
-                        choices=[
-                            ui.choice(name=col, label=col) for col in df.columns.values
-                        ],
-                        trigger=True,
-                        value=q.client.x_variable,
-                    ),
-                    ui.dropdown(
-                        name="y_variable",
-                        label="Y Variable",
-                        choices=[
-                            ui.choice(name=col, label=col) for col in df.columns.values
-                        ],
-                        trigger=True,
-                        value=q.client.y_variable,
-                    ),
-                ]
-            ),
-            ui.visualization(
-                data=data(
-                    fields=df.columns.tolist(),
-                    rows=df.values.tolist(),
-                    pack=True,
-                ),
-                plot=ui.plot(
-                    marks=[
-                        ui.mark(
-                            type="point",
-                            x=f"={q.client.x_variable}",
-                            x_title="",
-                            y=f"={q.client.y_variable}",
-                            y_title="",
-                            color="=data_type",
-                            shape="circle",
-                            size="=counts",
-                        )
-                    ]
-                ),
-            ),
-        ],
-    )
-
-
-# Defines dashboard tab logic
-def dashboard_view(q):
-    # Deletes UI elements from other tabs
-    del q.page["plot_view"]
-    del q.page["table_view"]
-
-    df = aggregated_data()
-
-    q.page["dashboard1"] = ui.form_card(
-        box="content",
-        items=[
-            ui.range_slider(
-                name="range_slider",
-                label="Select the cities you wish to view data for between two rankings",
-                min=1,
-            ),
-            ui.button(name="show_inputs", label="Submit", primary=True),
-        ],
-    )
-
-    q.page["dashboard2"] = ui.form_card(
-        box="content", items=[ui.text_xl(df.iloc[:, 0:2].to_string())]
-    )
-
-
-# Defines preliminary dataset logic
-def aggregated_data():
-    df = pd.DataFrame(dict(c1=range(0, 100), c2=range(1, 101), counts=range(2, 102)))
-    return df
