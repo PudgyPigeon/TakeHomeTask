@@ -10,6 +10,7 @@ async def serve(q):
     if not q.client.initialized:
         new_user_setup(q)
         table_view(q)
+        server_setup(q)
     elif q.args.table:
         table_view(q)
     elif q.args.plot:
@@ -64,9 +65,17 @@ def new_user_setup(q):
 # Instantiate Boto3 Client to interact with AWS S3 bucket
 def server_setup(q):
     
-    s3_client = boto3.client('s3')
-    response = s3_client.list_buckets()
-
+    s3 = boto3.resource('s3')
+    # response = s3.get_object(Bucket='myparq', Key='minwage.parquet')
+    # data = response('Body').read()
+    
+    for bucket in s3.buckets.all():
+        print(bucket.name)
+        
+    obj = s3.Object(bucket_name='myparq', key='minwage.parquet')
+    response = obj.get()
+    data = response['Body'].read()
+    print(data)
 
 # Defines table view logic
 def table_view(q):
@@ -176,9 +185,10 @@ def dashboard_view(q):
     q.page["dashboard2"] = ui.form_card(
         box="content",
         items=[
-            ui.text_xl("Hello there ")
+            ui.text_xl("Hello there, General Kenobi ")
         ]
     )
+    
 
 # Defines preliminary dataset logic
 def aggregated_data():

@@ -11,8 +11,12 @@ The "System Overview" section will cover the general scope of the project, while
 "Design Considerations" will cover the assumptions, goals, and guidelines
 that should be considered before development of the application starts.
 
-"Architectural Strategies" will go over preliminary planning and strategies 
+"Design Considerations" will go over preliminary planning and strategies 
 that may aid in the development process.
+
+"Detailed System Designs" will provide slightly more in-depth discussions on the way
+the web app has been created and the intricacies involved, insofar as the developer
+has experienced them.
 
 
 ## System Overview
@@ -80,9 +84,6 @@ Further guidelines that should be adhered to is the Python Black and Conventiona
 standard. These should be completed in short order and I do not expect any 
 troubles in this regard.
 
---Addendum: 
-After further research into parquet files and AWS S3, I can surmise that it will be necessary to create an API with 
-Python in order to host the data used by the H20Wave App. AWS Wrangler looks to be the perfect tool for the job.
 
 (Implementation of Dask will be considered if time allows)
 
@@ -90,11 +91,10 @@ Python in order to host the data used by the H20Wave App. AWS Wrangler looks to 
 Reading supporting documentation and consulting other learning materials will
 be instrumental in completing this task.
 
-Aside from this, general remarks on the development method would be to start
-with creating the development environment in a Python container first and 
-setting up the Dockerfile/Docker-Compose configurations.
--Additional note of concern: Proper set-up of docker-compose will be essential in the
-development process due to frequent changes at the start of development.
+After setting up the basic UI elements for the web app, efforts will shift to 
+loading the XML/CSV datasets to AWS S3 Bucket and then using Amazon's in-built
+crawlers to convert said datasets into parquet files. After which, the data should 
+be fetched by the base Python application to be used in displaying data.
 
 Once that is accomplished, efforts should shift to granting the Docker container 
 the proper environment variables and ensuring that Github pulls and pushes work
@@ -114,21 +114,36 @@ the H20Wave framework after this point.
 
 The main file "app.py" outlines the UI elements show on the page.
 
-At the moment, there is no authentication or hosting of real-time data. Every element
-on the website is currently mock data but has allowed me to learn more about the compositional
-aspects of the H20 framework.
+Each tab presently within the app: "Table View", "Plot View", and "Dashboard View" is defined by their own functions.
+Before the DOM renders each respective data chart, the function del q.page[''] is used to wipe the
+screen clean before the function then proceeds to bring up the respective chart. The components 
+being rendered and deleted are "cards," H2O's way of organizing forms, text, images, and other
+data.
 
-Each view presently within the app: "Table View" and "Plot View" is defined by their own functions.
-Before the DOM renders each respective data chart, the function del q.page[] is used to wipe the
-screen clean before the function then proceeds to bring up the respective chart.
+The way H2O-Wave works is by composing everything in a grid-based/dictionary based system. The site, its pages, and its cards work much like indexed values inside of an array. In a sense,
+this is an intuitive move by H2O's developers to accomodate the mode of thinking that 
+most data scientists employ throughout the majority of their work.
 
-From my brief experimentation with the framework, every frontend element encountered so far is 
-laid out in a dictionary/array format which simplifies the composotion of the frontend. Further
-research into the backend integration in this framework will be needed as development continues.
+In regards to the backend, datasets were taken from Kaggle so as to cut down on the time necessary
+to create mock datasets. Unfortunately, though the task prompt requested specific data be downloaded, errors were encountered in the procurement of said files and so, a suitable replacement
+was found. 
 
+These datasets were initially CSV files and converted through AWS's Glue crawler modules into 
+parquet files, a columnar dataset utilized for its scalability, speed, and specificity of its
+querying.
 
+The app was composed in WSL2 initially and then Dockerized after completion of the prototype. The
+Docker component of this app relies on the Dockerfile as well as the Docker Compose file, both 
+of which define the libraries, CLI commands, and various other variables necessary for setting
+up the development environment.
 
+# Checklist of things to do:
 
-To be updated as development progresses.
+1.) Fetch data from AWS S3 Bucket - Perhaps through a library like Pandas or Boto3
+    -Then display it in charts using q.args
+
+2.) Set up SSO Authentication/Login for user
+
+3.) Dockerize Application
 
 
