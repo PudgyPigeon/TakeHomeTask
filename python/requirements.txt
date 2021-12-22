@@ -38,6 +38,9 @@ future == 0.18.2
 # TakeHomeTask/venv/lib64/python3.8/site-packages/uvicorn/workers.py: 4
 gunicorn == 20.1.0
 
+pyarrow
+
+fastparquet
 # TakeHomeTask/app.py: 2
 # TakeHomeTask/dashboard.py: 2
 # TakeHomeTask/new_user.py: 2
