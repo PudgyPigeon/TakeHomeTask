@@ -2,15 +2,19 @@
 from h2o_wave import ui, Q, app, main, data
 import pandas as pd
 import boto3
+from dotenv import load_dotenv
+import os
 
 # Main function which serves the site
 @app("/")
 async def serve(q):
 
     if not q.client.initialized:
+        load_dotenv()
         new_user_setup(q)
         table_view(q)
         server_setup(q)
+        
     elif q.args.table:
         table_view(q)
     elif q.args.plot:
@@ -64,6 +68,9 @@ def new_user_setup(q):
 
 # Instantiate Boto3 Client to interact with AWS S3 bucket
 def server_setup(q):
+    
+    awskey = os.environ.get("AWS_KEY")
+    awssecret = os.environ.get("AWS_SECRET_KEY")
     
     s3 = boto3.resource('s3')
     # response = s3.get_object(Bucket='myparq', Key='minwage.parquet')
