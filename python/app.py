@@ -16,12 +16,14 @@ from dashboard import dashboard_view
 # Use custom module to load in dataset from AWS S3
 dataframe = load_data()
 
-print(dataframe[["city", "one_adult_no_kids_living_wage"]])
+print(dataframe[["city", "one_adult_no_kids_living_wage"]].head)
 
 
 # Main function which serves the site
 @app("/")
 async def serve(q):
+
+    print("starting")
 
     # Sets up a new user and presents the table view as the initial UI element
     if not q.client.initialized:
